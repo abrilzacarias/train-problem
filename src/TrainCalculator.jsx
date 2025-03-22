@@ -8,27 +8,30 @@ import { Slider } from "@/components/ui/slider"
 import { Clock, Gauge, ArrowRightLeftIcon as ArrowsRightLeft } from "lucide-react"
 
 export default function TrainCalculator() {
-  const [distance, setDistance] = useState(200)
+  const [distance, setDistance] = useState(200) //distance inicialmente se establece en 200
+  //setDistance es la funcion que se utilizara para actualizar el valor de distance
 
   const [trainA, setTrainA] = useState({
-    departureTime: "08:00",
-    speed: 80,
+    departureTime: "08:00", //hora de salida del tren
+    speed: 80, //velocidad del tren, inicialmente en 80 km/h
   })
 
   const [trainB, setTrainB] = useState({
-    departureTime: "08:00",
+    departureTime: "08:00", 
     speed: 100,
   })
 
   const [result, setResult] = useState({
     meetingTimeHours: null,
     meetingActualTime: null,
-    trainADistance: null,
+    trainADistance: null, //la distancia que recorrio A hasta encontrarse con B 
     trainBDistance: null,
     meetingPoint: null,
   })
 
-  const [calculated, setCalculated] = useState(false)
+  const [calculated, setCalculated] = useState(false) 
+  //calculated es una variable de estado que indica si el calculo ya ha sido realizado o no
+  //setCalculated funcion para actualizar calculated para mostrar un mensaje
 
   const handleTrainAChange = (e) => {
     const { name, value } = e.target
@@ -54,24 +57,29 @@ export default function TrainCalculator() {
   }
 
   const calculateMeeting = () => {
+    //convierte la hora de salida de los trenes a minutos para facilitar los calculos de tiempo
     const timeAToMinutes = convertTimeToMinutes(trainA.departureTime)
     const timeBToMinutes = convertTimeToMinutes(trainB.departureTime)
 
     const timeDiffHours = (timeBToMinutes - timeAToMinutes) / 60
+    //en caso de que salgan a horarios diferentes, calcula la diferencia en horas entre la salida de A y B
 
-    let meetingTimeHours
-    let trainATimeInMotion
+    let meetingTimeHours //el tiempo que paso hasta que los trenes se encuentran
+    let trainATimeInMotion //tiempo en movimiento de A
     let trainBTimeInMotion
 
+    //si ambos salen a la misma hora
     if (timeAToMinutes === timeBToMinutes) {
       meetingTimeHours = distance / (trainA.speed + trainB.speed)
       trainATimeInMotion = meetingTimeHours
       trainBTimeInMotion = meetingTimeHours
     } else {
+      //si el tren A sale antes
       if (timeAToMinutes < timeBToMinutes) {
-        const headStartHours = timeDiffHours
-        const distanceTraveledByA = trainA.speed * headStartHours
+        const headStartHours = timeDiffHours //calculamos el tiempo de ventaja 
+        const distanceTraveledByA = trainA.speed * headStartHours //calculamos la distancia que recorrio A durante el tiempo de ventaja
 
+        //en caso de que la distancia recorrida por A sea mayor o igual a la distancia entre ambos trenes
         if (distanceTraveledByA >= distance) {
           setResult({
             meetingTimeHours: null,
@@ -81,17 +89,18 @@ export default function TrainCalculator() {
             meetingPoint: null,
             chartData: [],
           })
-          setCalculated(true)
+          setCalculated(true) //muestra el mensaje
           return
         }
 
+        //calculo el tiempo restante para que los trenes se encuentren en caso de que A no haya llegado a destino
         const remainingDistance = distance - distanceTraveledByA
         const timeAfterBStarts = remainingDistance / (trainA.speed + trainB.speed)
 
         meetingTimeHours = headStartHours + timeAfterBStarts
         trainATimeInMotion = meetingTimeHours
         trainBTimeInMotion = timeAfterBStarts
-      } else {
+      } else { //en caso que B haya salido antes que A
         const headStartHours = -timeDiffHours
         const distanceTraveledByB = trainB.speed * headStartHours
 
@@ -117,14 +126,14 @@ export default function TrainCalculator() {
       }
     }
 
-    const earliestDepartureMinutes = Math.min(timeAToMinutes, timeBToMinutes)
-    const meetingTimeMinutes = earliestDepartureMinutes + meetingTimeHours * 60
-    const meetingActualTime = format(addMinutes(new Date().setHours(0, 0, 0, 0), meetingTimeMinutes), "HH:mm")
+    const earliestDepartureMinutes = Math.min(timeAToMinutes, timeBToMinutes) //determina cual de los trenes salio antes
+    const meetingTimeMinutes = earliestDepartureMinutes + meetingTimeHours * 60 // obtenemos el tiempo total en minutos en que ambos trenes se encuentran
+    const meetingActualTime = format(addMinutes(new Date().setHours(0, 0, 0, 0), meetingTimeMinutes), "HH:mm") //se formatea el tiempo 
 
-    const trainADistance = trainA.speed * trainATimeInMotion
-    const trainBDistance = trainB.speed * trainBTimeInMotion
+    const trainADistance = trainA.speed * trainATimeInMotion //calcula la distancia recorrida por el tren A
+    const trainBDistance = trainB.speed * trainBTimeInMotion //calcula la distancia recorrida por el tren B
 
-    const meetingPoint = trainA.speed * trainATimeInMotion
+    const meetingPoint = trainA.speed * trainATimeInMotion //calculamos en que punto se encuentran en km a partir de A
 
     setResult({
       meetingTimeHours,
