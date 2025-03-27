@@ -33,6 +33,6 @@ Este proyecto aborda el Problema de Trenes en el contexto de la cátedra de Mode
    ```
 
 ## Autores
-- Marianela acosta (https://github.com/acostamarianela)
+- Marianela Acosta (https://github.com/acostamarianela)
 - Abril Zacaria (https://github.com/abrilzacarias)
 
